@@ -1,10 +1,3 @@
-# Ensure required packages are installed (avoids ModuleNotFoundError in Streamlit Cloud)
-import importlib.util, subprocess, sys
-
-for package_name in ["joblib"]:
-    if importlib.util.find_spec(package_name) is None:
-        print(f"Package '{package_name}' not found. Installing...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])import streamlit as st
 import pandas as pd
 import joblib
 from scipy.sparse import hstack
