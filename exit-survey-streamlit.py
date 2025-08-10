@@ -1,4 +1,6 @@
-import streamlit as st, pandas as pd, joblib
+import streamlit as st
+import pandas as pd
+import joblib
 from scipy.sparse import hstack
 
 st.set_page_config(page_title="Exit Survey Classifier", layout="wide")
