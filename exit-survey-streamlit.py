@@ -4,7 +4,7 @@ import pandas as pd
 import joblib
 from scipy.sparse import hstack
 
-# Get the directory this file is in
+# Get the folder this script is in
 BASE_DIR = os.path.dirname(__file__)
 
 st.set_page_config(page_title="Exit Survey Classifier", layout="wide")
