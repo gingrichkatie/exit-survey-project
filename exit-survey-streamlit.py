@@ -1,17 +1,21 @@
+import os
 import streamlit as st
 import pandas as pd
 import joblib
 from scipy.sparse import hstack
+
+# Get the directory this file is in
+BASE_DIR = os.path.dirname(__file__)
 
 st.set_page_config(page_title="Exit Survey Classifier", layout="wide")
 st.title("Exit Survey – Reason for Leaving")
 
 @st.cache_resource
 def load_artifacts():
-    model = joblib.load("artifacts/best_model.pkl")
-    preprocess = joblib.load("artifacts/preprocess.pkl")
-    text_vectorizer = joblib.load("artifacts/text_vectorizer.pkl")
-    config = joblib.load("artifacts/column_config.pkl")
+    model = joblib.load(os.path.join(BASE_DIR, "best_model.pkl"))
+    preprocess = joblib.load(os.path.join(BASE_DIR, "preprocess.pkl"))
+    text_vectorizer = joblib.load(os.path.join(BASE_DIR, "text_vectorizer.pkl"))
+    config = joblib.load(os.path.join(BASE_DIR, "column_config.pkl"))
     return model, preprocess, text_vectorizer, config
 
 model, preprocess, text_vectorizer, cfg = load_artifacts()
