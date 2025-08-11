@@ -3,6 +3,12 @@ import streamlit as st
 import pandas as pd
 import joblib
 from scipy.sparse import hstack
+import sklearn.compose._column_transformer as ct
+
+# Quick debug 
+class _RemainderColsList(list):
+    pass
+ct._RemainderColsList = _RemainderColsList
 
 # Get the folder this script is in
 BASE_DIR = os.path.dirname(__file__)
