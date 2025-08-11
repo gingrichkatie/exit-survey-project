@@ -28,8 +28,11 @@ st.markdown("""
     border: none !important;
     box-shadow: none !important;
 }
-</style>
-""", unsafe_allow_html=True)
+/* Optional: adjust padding */
+.block-container {
+    padding-top: 1.5rem;
+    padding-bottom: 2.5rem;
+}
 </style>
 """, unsafe_allow_html=True)
 
