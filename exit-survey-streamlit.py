@@ -17,12 +17,19 @@ BASE_DIR = os.path.dirname(__file__)
 REQ = ["best_model.pkl", "preprocess.pkl", "text_vectorizer.pkl", "column_config.pkl"]
 
 st.set_page_config(page_title="Exit Survey Classifier", layout="wide")
-# Fix tabs getting cut off (wrap onto next line instead of hiding)
 st.markdown("""
 <style>
+/* Wrap tabs so they don't get cut off */
 .stTabs [data-baseweb="tab-list"] {
     flex-wrap: wrap !important;
 }
+/* Remove gray borders/outlines on tabs */
+.stTabs [role="tab"] {
+    border: none !important;
+    box-shadow: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
 </style>
 """, unsafe_allow_html=True)
 
