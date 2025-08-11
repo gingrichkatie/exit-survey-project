@@ -1,4 +1,4 @@
-mport os, io, traceback
+import os, io, traceback
 import streamlit as st
 import pandas as pd
 import joblib
