@@ -1,3 +1,5 @@
+# Exit Survey Classifier — Refined Theme (soft banner, neutral buttons, red charts, exit options with descriptions)
+
 import os, io, traceback
 import streamlit as st
 import pandas as pd
@@ -26,7 +28,7 @@ st.markdown("""
   --line:#E5E7EB;         /* borders */
   --bg:#F8FAFC;           /* page bg */
   --card:#FFFFFF;         /* card bg */
-  --accent:#C62828;       /* business red for accents/charts */
+  --accent:#C62828;       /* business red */
   --btn:#E5E7EB;          /* neutral gray button */
   --btn-h:#D1D5DB;        /* hover gray */
 }
@@ -34,19 +36,30 @@ st.markdown("""
 html, body, [class^="css"]{ background:var(--bg) !important; color:var(--ink); }
 section.main > div{ padding-top:0.75rem; padding-bottom:2rem; }
 
-/* Full-width red header bar */
-.full-bleed-banner{
+/* Refined header: thin accent bar + soft banner */
+.accent-bar{
   width:100vw; position:relative; left:50%; right:50%;
   margin-left:-50vw; margin-right:-50vw;
-  background:var(--accent) !important; border:none !important;
-  margin-bottom: 1.5rem !important;   /* space before tabs */
+  height:4px; background:var(--accent);
 }
-.full-bleed-inner{
-  max-width:1200px; margin:0 auto; padding:16px 24px;
-  display:flex; align-items:center; gap:14px;
+.soft-banner{
+  width:100vw; position:relative; left:50%; right:50%;
+  margin-left:-50vw; margin-right:-50vw;
+  background: linear-gradient(90deg, rgba(198,40,40,.06), rgba(198,40,40,.02));
+  border-bottom:1px solid var(--line);
+  padding:10px 0;
+  margin-bottom: 1.25rem; /* breathing room before tabs */
 }
-.full-bleed-title{ color:#fff; margin:0; font-weight:700; font-size:1.6rem; letter-spacing:.2px; }
-.full-bleed-sub{ color:#FFEAEA; margin:2px 0 0 0; font-size:.95rem; }
+.soft-banner-inner{
+  max-width:1200px; margin:0 auto; padding:0 24px;
+  display:flex; align-items:center; gap:12px;
+}
+.soft-title{
+  margin:0; font-weight:700; font-size:1.35rem; letter-spacing:.2px; color:var(--ink);
+}
+.soft-sub{
+  color:var(--muted); margin:2px 0 0 0; font-size:.95rem;
+}
 
 /* Panels */
 .panel{
@@ -88,12 +101,13 @@ hr.div{ border:none; height:2px; background:var(--line); margin:12px 0 18px; }
 """, unsafe_allow_html=True)
 
 # ---------------- BANNER ----------------
+st.markdown("""<div class="accent-bar"></div>""", unsafe_allow_html=True)
 st.markdown("""
-<div class="full-bleed-banner">
-  <div class="full-bleed-inner">
+<div class="soft-banner">
+  <div class="soft-banner-inner">
     <div>
-      <div class="full-bleed-title">Exit Survey Classifier</div>
-      <div class="full-bleed-sub">Predict the primary reason for leaving — manual entry or CSV batch.</div>
+      <div class="soft-title">💼 Exit Survey Classifier</div>
+      <div class="soft-sub">📈 Predict the primary reason for leaving — manual entry or CSV batch.</div>
     </div>
   </div>
 </div>
@@ -305,14 +319,13 @@ with tab_manual:
             hist_row["confidence"] = None if conf is None else float(conf[0])
             st.session_state.history = pd.concat([st.session_state.history, hist_row], ignore_index=True)
 
-    # Right: Exit Options (dropdown with description; no chip list)
+    # Right: Exit Options (dropdown with description; cleaner look)
     with right:
         st.markdown("<h4 style='margin:0 0 6px 0;'>Exit Options</h4>", unsafe_allow_html=True)
         st.markdown("<div class='panel tight'>", unsafe_allow_html=True)
 
         if CLASS_LIST:
             sel = st.selectbox("Browse option details", options=CLASS_LIST, index=0 if CLASS_LIST else None)
-            # Description card
             d = desc_map.get(sel, infer_description(sel))
             st.markdown(
                 f"""
