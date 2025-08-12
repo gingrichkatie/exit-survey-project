@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
-# Exit Survey Classifier — Pro Theme
-# Clean, business-forward UI: bold outlines, flat tabs, neutral colors.
+# Exit Survey Classifier — Pro+ Theme (with Footer)
+# Business-forward UI with banner, class options panel, blue buttons, and slim footer.
 
 import os, io, traceback
+from datetime import datetime
 import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
 from scipy.sparse import hstack
 import altair as alt
+
+# ===== Footer metadata (edit these) =====
+AUTHOR_NAME  = "Kathleen Gingrich"
+COURSE_INFO  = "CIS 9660"  
+# ========================================
 
 # ---- sklearn shim for old pickles that reference private class
 import sklearn.compose._column_transformer as ct
@@ -29,31 +35,30 @@ st.set_page_config(
 )
 
 # ───────────────────────────
-# Professional theme (navy / slate / blue)
-# Tabs are FLAT with underline for the active one; strong card borders.
+# Professional theme (navy / blue / slate)
 # ───────────────────────────
 st.markdown("""
 <style>
 :root{
-  --brand:#0B3A75;   /* navy */
-  --brand-2:#1F6FEB; /* blue */
-  --ink:#111827;     /* text */
-  --muted:#6B7280;   /* secondary text */
-  --line:#D1D5DB;    /* border */
-  --bg:#F8FAFC;      /* page bg */
-  --card:#FFFFFF;    /* card bg */
+  --brand:#0B3A75;        /* navy */
+  --brand-2:#1F6FEB;      /* blue */
+  --ink:#111827;          /* text */
+  --muted:#6B7280;        /* secondary text */
+  --line:#D1D5DB;         /* border */
+  --bg:#F8FAFC;           /* page bg */
+  --card:#FFFFFF;         /* card bg */
 }
 
 html, body, [class^="css"]{ background:var(--bg) !important; color:var(--ink); }
-section.main > div{ padding-top:1rem; padding-bottom:2rem; }
+section.main > div{ padding-top:1rem; padding-bottom:2.25rem; }
 
 /* Banner */
 .pro-banner{
-  display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center;
-  background:linear-gradient(90deg, rgba(11,58,117,0.05), rgba(31,111,235,0.05));
-  border:2px solid var(--brand); border-radius:10px; padding:16px 18px;
+  display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:center;
+  background:linear-gradient(90deg, rgba(11,58,117,.05), rgba(31,111,235,.05));
+  border:2px solid var(--brand); border-radius:10px; padding:14px 16px;
 }
-.pro-banner .title{ font-size:1.5rem; font-weight:700; letter-spacing:.2px; }
+.pro-banner .title{ font-size:1.45rem; font-weight:700; letter-spacing:.2px; }
 .pro-banner .subtitle{ color:var(--muted); margin-top:4px; }
 
 /* KPI cards */
@@ -64,12 +69,13 @@ section.main > div{ padding-top:1rem; padding-bottom:2rem; }
 .kpi .label{ color:var(--muted); font-size:.85rem; }
 .kpi .value{ font-weight:700; font-size:1.05rem; }
 
-/* Panels (content cards) */
+/* Panels */
 .panel{
   background:var(--card); border:2px solid var(--line); border-radius:10px; padding:14px 16px;
 }
+.panel.tight{ padding:10px 12px; }
 
-/* FLAT TABS: no boxes; underline on active */
+/* FLAT TABS */
 .stTabs [data-baseweb="tab-list"]{ gap:18px; border-bottom:2px solid var(--line); }
 .stTabs [role="tab"]{
   background:transparent; border:none; padding:8px 2px; margin-bottom:-2px;
@@ -79,13 +85,36 @@ section.main > div{ padding-top:1rem; padding-bottom:2rem; }
   color:var(--brand); border-bottom:3px solid var(--brand);
 }
 
-/* Badges / small helpers */
-.badge{
-  display:inline-block; padding:2px 8px; border-radius:999px;
-  background:#EEF2FF; color:#1E40AF; border:1px solid #C7D2FE; font-size:.78rem; font-weight:700;
+/* Chips for classes */
+.chips{ display:flex; flex-wrap:wrap; gap:8px; }
+.chip{
+  border:2px solid var(--line); border-radius:999px; padding:4px 10px; background:#fff;
+  font-weight:600; color:var(--ink); font-size:.88rem;
 }
-.small{ color:var(--muted); font-size:.9rem; }
-hr.div{ border:none; height:2px; background:var(--line); margin:12px 0 18px; }
+.chip.note{ color:var(--muted); font-weight:500; border-style:dashed; }
+
+/* Download button style (blue) */
+div[data-testid="stDownloadButton"] > button{
+  background: linear-gradient(180deg, var(--brand-2), #165DDB) !important;
+  color:#fff !important; border:2px solid #134DB8 !important; border-radius:10px !important;
+  font-weight:700 !important;
+}
+div[data-testid="stDownloadButton"] > button:hover{
+  filter:brightness(1.03); box-shadow:0 2px 0 #0D3F99 inset;
+}
+
+/* Primary buttons */
+.stButton > button[kind="primary"], .stButton > button{
+  background:#0B3A75; color:#fff; border:2px solid #082B56; border-radius:10px;
+  font-weight:700;
+}
+.stButton > button:hover{ filter:brightness(1.03); }
+
+/* Footer */
+.footer{
+  text-align:center; color:var(--muted); font-size:.85rem; margin-top:22px;
+  padding-top:10px; border-top:2px solid var(--line);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -102,7 +131,7 @@ for candidate in ("logo.png","logo.jpg","logo.jpeg"):
 c_logo, c_text = st.columns([1,5])
 with c_logo:
     if logo_path:
-        st.image(logo_path, width=64)
+        st.image(logo_path, width=56)
 with c_text:
     st.markdown(f"""
 <div class="pro-banner">
@@ -114,7 +143,7 @@ with c_text:
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<hr class="div" />', unsafe_allow_html=True)
+st.markdown('<hr style="border:none;height:2px;background:var(--line);margin:12px 0 18px;" />', unsafe_allow_html=True)
 
 # ───────────────────────────
 # Helpers
@@ -183,13 +212,20 @@ CATEGORICAL_COLS = cfg.get("CATEGORICAL_COLS", [])
 TEXT_COL = cfg.get("TEXT_COL", None)
 CLASS_ORDER = cfg.get("CLASS_ORDER", None)
 CAT_CHOICES = cfg.get("CATEGORICAL_CHOICES", {})
+CLASS_LABEL_DESCRIPTIONS = cfg.get("CLASS_LABEL_DESCRIPTIONS", {})  # optional mapping
 EXPECTED_COLS = NUMERIC_COLS + CATEGORICAL_COLS + ([TEXT_COL] if TEXT_COL else [])
 INT_COLS = cfg.get("INTEGER_COLS", [])
 if "Age" in NUMERIC_COLS and "Age" not in INT_COLS:
     INT_COLS = list(set(INT_COLS + ["Age"]))
 
+# Derive class list
+try:
+    CLASS_LIST = list(CLASS_ORDER) if CLASS_ORDER else list(getattr(model, "classes_", []))
+except Exception:
+    CLASS_LIST = list(getattr(model, "classes_", []))
+
 # ───────────────────────────
-# Compact status row
+# Status row
 # ───────────────────────────
 k1, k2, k3, k4 = st.columns([1,1,1,1])
 with k1:
@@ -197,16 +233,16 @@ with k1:
 with k2:
     st.markdown(f'<div class="kpi"><div class="label">Features</div><div class="value">{len(EXPECTED_COLS)}</div></div>', unsafe_allow_html=True)
 with k3:
-    n_classes = len(CLASS_ORDER) if CLASS_ORDER else "–"
+    n_classes = len(CLASS_LIST) if CLASS_LIST else "–"
     st.markdown(f'<div class="kpi"><div class="label">Classes</div><div class="value">{n_classes}</div></div>', unsafe_allow_html=True)
 with k4:
     txt = "Enabled" if TEXT_COL else "–"
     st.markdown(f'<div class="kpi"><div class="label">Text Feature</div><div class="value">{txt}</div></div>', unsafe_allow_html=True)
 
-st.markdown('<hr class="div" />', unsafe_allow_html=True)
+st.markdown('<hr style="border:none;height:2px;background:var(--line);margin:12px 0 18px;" />', unsafe_allow_html=True)
 
 # ───────────────────────────
-# Tabs (flat)
+# Tabs
 # ───────────────────────────
 tab_manual, tab_csv, tab_insights = st.tabs(["Manual Prediction", "CSV Upload", "Insights"])
 
@@ -219,101 +255,125 @@ if "history" not in st.session_state:
 # =========================================================
 with tab_manual:
     st.subheader("Manual Prediction")
-    st.markdown("<div class='panel small'>Complete the form and generate a prediction. All required dropdowns must be selected to enable the button.</div>", unsafe_allow_html=True)
 
-    vals = {}
-    cA, cB = st.columns(2)
+    left, right = st.columns([2,1])
 
-    with cA:
-        st.markdown("**Numeric Inputs**")
-        for col in NUMERIC_COLS:
-            if col in INT_COLS:
-                vals[col] = st.number_input(col, value=0, step=1, format="%d")
-            else:
-                vals[col] = st.number_input(col, value=0.00, step=0.01, format="%.2f")
+    with left:
+        st.markdown("<div class='panel' style='margin-bottom:10px;'>Complete the form and generate a prediction. All required dropdowns must be selected to enable the button.</div>", unsafe_allow_html=True)
+        vals = {}
+        cA, cB = st.columns(2)
 
-    with cB:
-        st.markdown("**Categorical Inputs**")
-        for col in CATEGORICAL_COLS:
-            choices = [str(x) for x in CAT_CHOICES.get(col, [])]
-            if "Other" in choices:
-                choices = [c for c in choices if c != "Other"] + ["Other"]
-            if choices:
-                vals[col] = st.selectbox(col, options=choices, index=None, placeholder=f"Select {col}")
-            else:
-                vals[col] = st.text_input(col, value="")
+        with cA:
+            st.markdown("**Numeric Inputs**")
+            for col in NUMERIC_COLS:
+                if col in INT_COLS:
+                    vals[col] = st.number_input(col, value=0, step=1, format="%d")
+                else:
+                    vals[col] = st.number_input(col, value=0.00, step=0.01, format="%.2f")
 
-    if TEXT_COL:
-        st.markdown("**Optional Text**")
-        vals[TEXT_COL] = st.text_area(TEXT_COL, value="", height=110, placeholder="Short note (optional)")
+        with cB:
+            st.markdown("**Categorical Inputs**")
+            for col in CATEGORICAL_COLS:
+                choices = [str(x) for x in CAT_CHOICES.get(col, [])]
+                if "Other" in choices:
+                    choices = [c for c in choices if c != "Other"] + ["Other"]
+                if choices:
+                    vals[col] = st.selectbox(col, options=choices, index=None, placeholder=f"Select {col}")
+                else:
+                    vals[col] = st.text_input(col, value="")
 
-    ready = all(v not in (None, "") for k, v in vals.items() if k in CATEGORICAL_COLS)
-    c_btn, _ = st.columns([1,4])
-    with c_btn:
-        predict_clicked = st.button("Predict", use_container_width=True, disabled=not ready)
+        if TEXT_COL:
+            st.markdown("**Optional Text**")
+            vals[TEXT_COL] = st.text_area(TEXT_COL, value="", height=110, placeholder="Short note (optional)")
 
-    if not ready:
-        st.caption("Select all dropdown values to enable prediction.")
+        ready = all(v not in (None, "") for k, v in vals.items() if k in CATEGORICAL_COLS)
+        c_btn, _ = st.columns([1,4])
+        with c_btn:
+            predict_clicked = st.button("Predict", use_container_width=True, disabled=not ready)
 
-    if predict_clicked:
-        row = pd.DataFrame([vals])
-        row = row[EXPECTED_COLS] if EXPECTED_COLS else row
+        if not ready:
+            st.caption("Select all dropdown values to enable prediction.")
 
-        # normalize types
-        for c in CATEGORICAL_COLS:
-            row[c] = row[c].astype(str).str.strip()
-        for c in NUMERIC_COLS:
-            if c in INT_COLS:
-                row[c] = pd.to_numeric(row[c], errors="coerce").fillna(0).astype(int)
-            else:
-                row[c] = pd.to_numeric(row[c], errors="coerce").fillna(0.0)
+        if predict_clicked:
+            row = pd.DataFrame([vals])
+            row = row[EXPECTED_COLS] if EXPECTED_COLS else row
 
-        preds, conf, proba, classes_ = predict_df(row, model, preprocess, text_vectorizer, TEXT_COL)
+            # normalize types
+            for c in CATEGORICAL_COLS:
+                row[c] = row[c].astype(str).str.strip()
+            for c in NUMERIC_COLS:
+                if c in INT_COLS:
+                    row[c] = pd.to_numeric(row[c], errors="coerce").fillna(0).astype(int)
+                else:
+                    row[c] = pd.to_numeric(row[c], errors="coerce").fillna(0.0)
 
-        # Result card
-        st.markdown('<br/>', unsafe_allow_html=True)
-        rc1, rc2 = st.columns([1.2, 2])
-        with rc1:
-            if conf is not None:
-                st.markdown(
-                    f"""
-                    <div class="panel">
-                      <div class="badge">Prediction</div>
-                      <h3 style="margin:6px 0 4px 0;">{preds[0]}</h3>
-                      <div class="small">Confidence: <strong>{conf[0]:.0%}</strong></div>
-                    </div>
-                    """, unsafe_allow_html=True
-                )
-            else:
-                st.markdown(
-                    f"""
-                    <div class="panel">
-                      <div class="badge">Prediction</div>
-                      <h3 style="margin:6px 0 4px 0;">{preds[0]}</h3>
-                      <div class="small">Model does not expose probabilities</div>
-                    </div>
-                    """, unsafe_allow_html=True
-                )
-        with rc2:
-            if proba is not None:
-                p = pd.DataFrame({"class": classes_, "prob": proba.flatten()}).sort_values("prob", ascending=False)
-                st.altair_chart(
-                    bar_chart_pro(p, "class:N", "prob:Q", title="Class Probabilities"),
-                    use_container_width=True
-                )
+            preds, conf, proba, classes_ = predict_df(row, model, preprocess, text_vectorizer, TEXT_COL)
 
-        # Update history
-        hist_row = row.copy()
-        hist_row["prediction"] = preds[0]
-        hist_row["confidence"] = None if conf is None else float(conf[0])
-        st.session_state.history = pd.concat([st.session_state.history, hist_row], ignore_index=True)
+            st.markdown('<br/>', unsafe_allow_html=True)
+            rc1, rc2 = st.columns([1.2, 2])
+            with rc1:
+                if conf is not None:
+                    st.markdown(
+                        f"""
+                        <div class="panel">
+                          <div class="badge">Prediction</div>
+                          <h3 style="margin:6px 0 4px 0;">{preds[0]}</h3>
+                          <div class="small">Confidence: <strong>{conf[0]:.0%}</strong></div>
+                        </div>
+                        """, unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(
+                        f"""
+                        <div class="panel">
+                          <div class="badge">Prediction</div>
+                          <h3 style="margin:6px 0 4px 0;">{preds[0]}</h3>
+                          <div class="small">Model does not expose probabilities</div>
+                        </div>
+                        """, unsafe_allow_html=True
+                    )
+            with rc2:
+                if proba is not None:
+                    p = pd.DataFrame({"class": classes_, "prob": proba.flatten()}).sort_values("prob", ascending=False)
+                    st.altair_chart(
+                        bar_chart_pro(p, "class:N", "prob:Q", title="Class Probabilities"),
+                        use_container_width=True
+                    )
+
+            # Update history
+            hist_row = row.copy()
+            hist_row["prediction"] = preds[0]
+            hist_row["confidence"] = None if conf is None else float(conf[0])
+            st.session_state.history = pd.concat([st.session_state.history, hist_row], ignore_index=True)
+
+    with right:
+        st.markdown("**Options for Exiting**")
+        st.markdown("<div class='panel tight'>", unsafe_allow_html=True)
+        if CLASS_LIST:
+            st.markdown('<div class="chips">', unsafe_allow_html=True)
+            for c in CLASS_LIST:
+                st.markdown(f'<div class="chip">{c}</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            # Optional descriptions
+            if isinstance(CLASS_LABEL_DESCRIPTIONS, dict) and len(CLASS_LABEL_DESCRIPTIONS) > 0:
+                st.markdown('<div style="margin-top:8px;"><strong>Definitions</strong></div>', unsafe_allow_html=True)
+                for cls in CLASS_LIST:
+                    desc = CLASS_LABEL_DESCRIPTIONS.get(cls, "")
+                    if desc:
+                        st.markdown(f"- **{cls}** — {desc}")
+                    else:
+                        st.markdown(f"- **{cls}** — <span class='chip note'>No description provided</span>", unsafe_allow_html=True)
+        else:
+            st.caption("No class list available from model/config.")
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================================================
 # CSV Upload
 # =========================================================
 with tab_csv:
     st.subheader("CSV Upload")
-    st.markdown("<div class='panel small'>Batch predictions. Use the template to match the expected schema.</div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel' style='margin-bottom:10px;'>Batch predictions. Start with the template to match the expected schema.</div>", unsafe_allow_html=True)
 
     st.download_button(
         "Download CSV Template",
@@ -323,6 +383,11 @@ with tab_csv:
         type="primary",
         help="Includes all required columns in order."
     )
+
+    if EXPECTED_COLS:
+        preview = pd.DataFrame(columns=EXPECTED_COLS).head(3)
+        st.caption("Template preview (columns only):")
+        st.dataframe(preview, use_container_width=True, height=120)
 
     f = st.file_uploader("Upload CSV matching the expected schema", type=["csv"])
 
@@ -335,10 +400,14 @@ with tab_csv:
                 st.exception(e)
             st.stop()
 
+        # Schema check
         missing = [c for c in EXPECTED_COLS if c not in data.columns]
+        extra = [c for c in data.columns if c not in EXPECTED_COLS]
         if missing:
             st.error("Missing columns: " + ", ".join(missing))
             st.stop()
+        if extra:
+            st.info("Note: Extra columns ignored — " + ", ".join(extra))
 
         data = data[EXPECTED_COLS]
         for c in CATEGORICAL_COLS:
@@ -401,5 +470,17 @@ with tab_insights:
     else:
         st.caption("No predictions yet. Use Manual Prediction or CSV Upload.")
 
+# ───────────────────────────
+# Footer (slim, professional)
+# ───────────────────────────
+last_updated = datetime.now().strftime("%b %d, %Y")
+st.markdown(
+    f"""
+<div class="footer">
+  <strong>Kathleen</strong> · CIS 9660 · Last updated {last_updated}
+</div>
+""",
+    unsafe_allow_html=True
+)
 
 
