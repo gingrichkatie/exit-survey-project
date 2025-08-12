@@ -93,14 +93,16 @@ section.main > div{ padding-top:1rem; padding-bottom:2.25rem; }
 }
 .chip.note{ color:var(--muted); font-weight:500; border-style:dashed; }
 
-/* Download button style (blue) */
+/* Download button style — neutral gray */
 div[data-testid="stDownloadButton"] > button{
-  background: linear-gradient(180deg, var(--brand-2), #165DDB) !important;
-  color:#fff !important; border:2px solid #134DB8 !important; border-radius:10px !important;
-  font-weight:700 !important;
+  background: #E5E7EB !important;  /* light gray */
+  color: #111827 !important;        /* near-black text */
+  border: 1px solid #D1D5DB !important; 
+  border-radius: 6px !important;
+  font-weight: 600 !important;
 }
 div[data-testid="stDownloadButton"] > button:hover{
-  filter:brightness(1.03); box-shadow:0 2px 0 #0D3F99 inset;
+  background: #D1D5DB !important;   /* slightly darker on hover */
 }
 
 /* Primary buttons */
