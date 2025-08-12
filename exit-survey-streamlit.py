@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# Exit Survey Classifier — Pro+ Theme (with Footer)
-# Business-forward UI with banner, class options panel, blue buttons, and slim footer.
+# Exit Survey Classifier — Pro+ Theme (Neutral Gray Buttons)
 
 import os, io, traceback
 from datetime import datetime
@@ -11,10 +10,9 @@ import joblib
 from scipy.sparse import hstack
 import altair as alt
 
-# ===== Footer metadata (edit these) =====
-AUTHOR_NAME  = "Kathleen Gingrich"
-COURSE_INFO  = "CIS 9660"  
-# ========================================
+# Footer metadata
+AUTHOR_NAME  = "Your Name"
+COURSE_INFO  = "Your Class or Org"
 
 # ---- sklearn shim for old pickles that reference private class
 import sklearn.compose._column_transformer as ct
@@ -35,18 +33,19 @@ st.set_page_config(
 )
 
 # ───────────────────────────
-# Professional theme (navy / blue / slate)
+# Theme + neutral gray buttons
 # ───────────────────────────
 st.markdown("""
 <style>
 :root{
   --brand:#0B3A75;        /* navy */
-  --brand-2:#1F6FEB;      /* blue */
   --ink:#111827;          /* text */
   --muted:#6B7280;        /* secondary text */
   --line:#D1D5DB;         /* border */
   --bg:#F8FAFC;           /* page bg */
   --card:#FFFFFF;         /* card bg */
+  --btn:#E5E7EB;          /* neutral gray */
+  --btn-h:#D1D5DB;        /* hover gray */
 }
 
 html, body, [class^="css"]{ background:var(--bg) !important; color:var(--ink); }
@@ -55,7 +54,7 @@ section.main > div{ padding-top:1rem; padding-bottom:2.25rem; }
 /* Banner */
 .pro-banner{
   display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:center;
-  background:linear-gradient(90deg, rgba(11,58,117,.05), rgba(31,111,235,.05));
+  background:linear-gradient(90deg, rgba(11,58,117,.05), rgba(11,58,117,.02));
   border:2px solid var(--brand); border-radius:10px; padding:14px 16px;
 }
 .pro-banner .title{ font-size:1.45rem; font-weight:700; letter-spacing:.2px; }
@@ -85,7 +84,7 @@ section.main > div{ padding-top:1rem; padding-bottom:2.25rem; }
   color:var(--brand); border-bottom:3px solid var(--brand);
 }
 
-/* Chips for classes */
+/* Class chips */
 .chips{ display:flex; flex-wrap:wrap; gap:8px; }
 .chip{
   border:2px solid var(--line); border-radius:999px; padding:4px 10px; background:#fff;
@@ -93,24 +92,24 @@ section.main > div{ padding-top:1rem; padding-bottom:2.25rem; }
 }
 .chip.note{ color:var(--muted); font-weight:500; border-style:dashed; }
 
-/* Download button style — neutral gray */
-div[data-testid="stDownloadButton"] > button{
-  background: #E5E7EB !important;  /* light gray */
-  color: #111827 !important;        /* near-black text */
-  border: 1px solid #D1D5DB !important; 
+/* Neutral gray BUTTONS (Download + Predict) */
+div[data-testid="stDownloadButton"] > button,
+div[data-testid="stDownloadButton"] > button[kind="primary"],
+.stButton > button,
+.stButton > button[kind="primary"]{
+  background: var(--btn) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line) !important;
   border-radius: 6px !important;
   font-weight: 600 !important;
+  box-shadow: none !important;
 }
-div[data-testid="stDownloadButton"] > button:hover{
-  background: #D1D5DB !important;   /* slightly darker on hover */
+div[data-testid="stDownloadButton"] > button:hover,
+div[data-testid="stDownloadButton"] > button[kind="primary"]:hover,
+.stButton > button:hover,
+.stButton > button[kind="primary"]:hover{
+  background: var(--btn-h) !important;
 }
-
-/* Primary buttons */
-.stButton > button[kind="primary"], .stButton > button{
-  background:#0B3A75; color:#fff; border:2px solid #082B56; border-radius:10px;
-  font-weight:700;
-}
-.stButton > button:hover{ filter:brightness(1.03); }
 
 /* Footer */
 .footer{
@@ -121,7 +120,7 @@ div[data-testid="stDownloadButton"] > button:hover{
 """, unsafe_allow_html=True)
 
 # ───────────────────────────
-# Optional logo (logo.png/.jpg/.jpeg alongside the script)
+# Optional logo
 # ───────────────────────────
 logo_path = None
 for candidate in ("logo.png","logo.jpg","logo.jpeg"):
@@ -214,13 +213,13 @@ CATEGORICAL_COLS = cfg.get("CATEGORICAL_COLS", [])
 TEXT_COL = cfg.get("TEXT_COL", None)
 CLASS_ORDER = cfg.get("CLASS_ORDER", None)
 CAT_CHOICES = cfg.get("CATEGORICAL_CHOICES", {})
-CLASS_LABEL_DESCRIPTIONS = cfg.get("CLASS_LABEL_DESCRIPTIONS", {})  # optional mapping
+CLASS_LABEL_DESCRIPTIONS = cfg.get("CLASS_LABEL_DESCRIPTIONS", {})
 EXPECTED_COLS = NUMERIC_COLS + CATEGORICAL_COLS + ([TEXT_COL] if TEXT_COL else [])
 INT_COLS = cfg.get("INTEGER_COLS", [])
 if "Age" in NUMERIC_COLS and "Age" not in INT_COLS:
     INT_COLS = list(set(INT_COLS + ["Age"]))
 
-# Derive class list
+# Class list
 try:
     CLASS_LIST = list(CLASS_ORDER) if CLASS_ORDER else list(getattr(model, "classes_", []))
 except Exception:
@@ -382,7 +381,7 @@ with tab_csv:
         data=_csv_template_bytes(EXPECTED_COLS),
         file_name="exit_survey_template.csv",
         mime="text/csv",
-        type="primary",
+        type="primary",  # still primary, but CSS forces neutral gray
         help="Includes all required columns in order."
     )
 
@@ -453,7 +452,6 @@ with tab_csv:
 with tab_insights:
     st.subheader("Insights")
     if not st.session_state.history.empty:
-        st.markdown("<span class='badge'>Newest entries appear last</span>", unsafe_allow_html=True)
         st.dataframe(st.session_state.history.tail(15), use_container_width=True)
 
         s1, s2 = st.columns([1,3])
@@ -473,16 +471,15 @@ with tab_insights:
         st.caption("No predictions yet. Use Manual Prediction or CSV Upload.")
 
 # ───────────────────────────
-# Footer (slim, professional)
+# Footer
 # ───────────────────────────
 last_updated = datetime.now().strftime("%b %d, %Y")
 st.markdown(
     f"""
 <div class="footer">
-  <strong>Kathleen</strong> · CIS 9660 · Last updated {last_updated}
+  <strong>{AUTHOR_NAME}</strong> · {COURSE_INFO} · Last updated {last_updated}
 </div>
 """,
     unsafe_allow_html=True
 )
-
 
