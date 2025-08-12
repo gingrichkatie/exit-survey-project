@@ -40,6 +40,7 @@ section.main > div{ padding-top:0.75rem; padding-bottom:2rem; }
 .full-bleed-banner{
   width:100vw; position:relative; left:50%; right:50%;
   margin-left:-50vw; margin-right:-50vw;
+  margin-bottom: 1.5rem;
   background:var(--accent); border:none;
 }
 .full-bleed-inner{
@@ -71,8 +72,14 @@ section.main > div{ padding-top:0.75rem; padding-bottom:2rem; }
 /* Chips (class list) */
 .chips{ display:flex; flex-wrap:wrap; gap:8px; }
 .chip{
-  border:1px solid var(--line); border-radius:999px; padding:4px 10px; background:#fff;
-  font-weight:600; color:var(--ink); font-size:.88rem;
+  background: var(--btn);       /* light gray background */
+  color: var(--ink);            /* dark text */
+  border: none;                 /* remove outline */
+  border-radius: 6px;           /* subtle rounded corners */
+  padding: 6px 12px;
+  font-weight: 600;
+  font-size: .88rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 .chip.note{ color:var(--muted); font-weight:500; border-style:dashed; }
 
