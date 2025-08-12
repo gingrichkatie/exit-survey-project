@@ -11,8 +11,8 @@ from scipy.sparse import hstack
 import altair as alt
 
 # Footer metadata
-AUTHOR_NAME  = "Your Name"
-COURSE_INFO  = "Your Class or Org"
+AUTHOR_NAME  = "Kathleen Gingrich"
+COURSE_INFO  = "CIS 9660"
 
 # ---- sklearn shim for old pickles that reference private class
 import sklearn.compose._column_transformer as ct
@@ -184,7 +184,6 @@ def predict_df(df_in, model, preprocess, text_vectorizer, text_col):
         return preds, conf, proba, model.classes_
     preds = model.predict(X)
     return preds, None, None, None
-
 def bar_chart_pro(df, x, y, title=""):
     base = alt.Chart(df).encode(
         x=alt.X(x, sort='-y', axis=alt.Axis(labelColor='#111827', titleColor='#111827', labelLimit=220)),
@@ -192,9 +191,11 @@ def bar_chart_pro(df, x, y, title=""):
         tooltip=[x, y]
     )
     bars = base.mark_bar(cornerRadius=2, stroke='#111827', strokeWidth=1, opacity=0.95).encode(
-        color=alt.value("#1F6FEB")
+        color=alt.value("#C62828")  # ← red now
     )
-    return bars.properties(height=260, title=title).configure_title(color='#111827')
+    return (bars.properties(title=title, height=300)
+                 .configure_axis(grid=False)
+                 .configure_view(strokeWidth=0))
 
 # ───────────────────────────
 # Load artifacts
@@ -477,7 +478,7 @@ last_updated = datetime.now().strftime("%b %d, %Y")
 st.markdown(
     f"""
 <div class="footer">
-  <strong>{AUTHOR_NAME}</strong> · {COURSE_INFO} · Last updated {last_updated}
+  <strong>Kathleen Gingrich</strong> · CIS 9660 · Last updated {last_updated}
 </div>
 """,
     unsafe_allow_html=True
