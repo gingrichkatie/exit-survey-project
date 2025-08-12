@@ -38,8 +38,8 @@ section.main > div{ padding-top:0.75rem; padding-bottom:2rem; }
 .full-bleed-banner{
   width:100vw; position:relative; left:50%; right:50%;
   margin-left:-50vw; margin-right:-50vw;
-  background:var(--accent); border:none;
-  margin-bottom: 1.5rem;  /* breathing room before tabs */
+  background:var(--accent) !important; border:none !important;
+  margin-bottom: 1.5rem !important;   /* space before tabs */
 }
 .full-bleed-inner{
   max-width:1200px; margin:0 auto; padding:16px 24px;
@@ -66,19 +66,6 @@ section.main > div{ padding-top:0.75rem; padding-bottom:2rem; }
 }
 .kpi .label{ color:var(--muted); font-size:.85rem; }
 .kpi .value{ font-weight:700; font-size:1.05rem; }
-
-/* Exit options chips — clean, no hollow circle */
-.chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
-.chip{
-  background: var(--btn);
-  color: var(--ink);
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-weight: 600;
-  font-size: .88rem;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-}
 
 /* Neutral gray buttons (download & primary) */
 div[data-testid="stDownloadButton"] button,
@@ -146,7 +133,7 @@ def predict_df(df_in, model, preprocess, text_vectorizer, text_col):
     preds = model.predict(X)
     return preds, None, None, None
 
-# Consistent red charts
+# Charts (consistent red)
 def bar_chart(df, x, y, title=""):
     base = alt.Chart(df).encode(
         x=alt.X(x, sort='-y', axis=alt.Axis(labelColor='#111827', titleColor='#111827', labelLimit=220)),
@@ -154,11 +141,33 @@ def bar_chart(df, x, y, title=""):
         tooltip=[x, y]
     )
     bars = base.mark_bar(cornerRadius=2, stroke='#111827', strokeWidth=1, opacity=0.95).encode(
-        color=alt.value("#C62828")  # consistent business red
+        color=alt.value("#C62828")
     )
     return (bars.properties(title=title, height=300)
             .configure_axis(grid=False)
             .configure_view(strokeWidth=0))
+
+# --- Fallback description inference for exit options ---
+DEFAULT_DESC_TEMPLATES = {
+    "compensation": "Pay, bonuses, equity, or market competitiveness concerns.",
+    "career growth": "Limited advancement, role ceiling, or promotion path issues.",
+    "work-life": "Scheduling, workload, flexibility, or remote/hybrid expectations.",
+    "management": "Manager relationship, feedback quality, or leadership style fit.",
+    "culture": "Team dynamics, values alignment, inclusion, or ethics concerns.",
+    "benefit": "Healthcare, PTO, parental leave, retirement or similar benefits.",
+    "commute": "Distance, travel time, relocation logistics, or site changes.",
+    "role fit": "Skills mismatch, scope mismatch, or misaligned responsibilities.",
+    "performance": "Expectations, KPIs, performance plan or review outcomes.",
+    "relocation": "Moving to a different region or country.",
+    "retirement": "Transitioning out of the workforce.",
+    "personal": "Family, education, health, or other personal priorities."
+}
+def infer_description(label: str) -> str:
+    key = label.strip().lower()
+    for k, v in DEFAULT_DESC_TEMPLATES.items():
+        if k in key:
+            return v
+    return f"Exit reason category: “{label}”."
 
 # ---------------- LOAD ARTIFACTS ----------------
 try:
@@ -178,11 +187,19 @@ INT_COLS = cfg.get("INTEGER_COLS", [])
 if "Age" in NUMERIC_COLS and "Age" not in INT_COLS:
     INT_COLS = list(set(INT_COLS + ["Age"]))
 
-# Class list (for exit options)
+# Class list
 try:
     CLASS_LIST = list(CLASS_ORDER) if CLASS_ORDER else list(getattr(model, "classes_", []))
 except Exception:
     CLASS_LIST = list(getattr(model, "classes_", []))
+
+# If descriptions missing or partial, fill from inference
+desc_map = {}
+if isinstance(CLASS_LABEL_DESCRIPTIONS, dict):
+    desc_map.update(CLASS_LABEL_DESCRIPTIONS)
+for cls in CLASS_LIST:
+    if not desc_map.get(cls):
+        desc_map[cls] = infer_description(cls)
 
 # ---------------- STATUS ROW ----------------
 k1, k2, k3, k4 = st.columns([1,1,1,1])
@@ -195,54 +212,6 @@ with k3:
 with k4:
     st.markdown(f'<div class="kpi"><div class="label">Text Feature</div><div class="value">{"Enabled" if TEXT_COL else "–"}</div></div>', unsafe_allow_html=True)
 st.markdown('<hr class="div" />', unsafe_allow_html=True)
-
-# ---------------- ABOUT THIS MODEL ----------------
-with st.expander("About this model", expanded=False):
-    algo = type(model).__name__
-    target = cfg.get("TARGET_COL", "Predicted class")
-    n_num = len(NUMERIC_COLS)
-    n_cat = len(CATEGORICAL_COLS)
-    text_feat = "Yes" if TEXT_COL else "No"
-    n_classes = len(CLASS_LIST) if CLASS_LIST else 0
-
-    train_start = cfg.get("TRAIN_START") or cfg.get("TRAIN_START_DATE") or cfg.get("train_start")
-    train_end   = cfg.get("TRAIN_END")   or cfg.get("TRAIN_END_DATE")   or cfg.get("train_end")
-    metrics = cfg.get("VALIDATION_METRICS", {})
-
-    st.markdown(
-        f"""
-**Algorithm:** {algo}  
-**Target:** {target}  
-**Classes:** {n_classes if n_classes else "—"}  
-**Features:** {n_num} numeric, {n_cat} categorical, Text feature: {text_feat}
-""".strip()
-    )
-
-    if train_start or train_end:
-        st.markdown(f"**Training window:** {train_start or 'unknown'} → {train_end or 'unknown'}")
-
-    if isinstance(metrics, dict) and metrics:
-        cols = st.columns(min(4, max(1, len(metrics))))
-        i = 0
-        for k, v in metrics.items():
-            val = f"{v:.3f}" if isinstance(v, (int, float)) else str(v)
-            with cols[i % len(cols)]:
-                st.metric(k.replace("_", " ").title(), val)
-            i += 1
-
-    with st.expander("Feature details", expanded=False):
-        st.markdown("**Numeric features**")
-        st.code(", ".join(NUMERIC_COLS) if NUMERIC_COLS else "—", language="text")
-        st.markdown("**Categorical features**")
-        st.code(", ".join(CATEGORICAL_COLS) if CATEGORICAL_COLS else "—", language="text")
-        if TEXT_COL:
-            st.markdown("**Text feature**")
-            st.code(TEXT_COL, language="text")
-
-    notes = cfg.get("NOTES") or cfg.get("MODEL_NOTES")
-    if notes:
-        st.markdown("**Notes**")
-        st.markdown(notes)
 
 # ---------------- TABS ----------------
 tab_manual, tab_csv, tab_insights = st.tabs(["Manual Prediction", "CSV Upload", "Insights"])
@@ -336,26 +305,24 @@ with tab_manual:
             hist_row["confidence"] = None if conf is None else float(conf[0])
             st.session_state.history = pd.concat([st.session_state.history, hist_row], ignore_index=True)
 
-    # Right: Exit Options (chips + dropdown with description)
+    # Right: Exit Options (dropdown with description; no chip list)
     with right:
-        # Clean section header (no icon/circle)
         st.markdown("<h4 style='margin:0 0 6px 0;'>Exit Options</h4>", unsafe_allow_html=True)
         st.markdown("<div class='panel tight'>", unsafe_allow_html=True)
 
         if CLASS_LIST:
-            # Chips view (flat, borderless—no empty circles)
-            st.markdown('<div class="chips">', unsafe_allow_html=True)
-            for c in CLASS_LIST:
-                st.markdown(f'<div class="chip">{c}</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-            # Focused browser for descriptions (no extra circle or hr above)
             sel = st.selectbox("Browse option details", options=CLASS_LIST, index=0 if CLASS_LIST else None)
-            desc = CLASS_LABEL_DESCRIPTIONS.get(sel, "") if isinstance(CLASS_LABEL_DESCRIPTIONS, dict) else ""
-            if desc:
-                st.markdown(f"<div class='small' style='margin-top:6px;'>{desc}</div>", unsafe_allow_html=True)
-            else:
-                st.caption("No description available for this option.")
+            # Description card
+            d = desc_map.get(sel, infer_description(sel))
+            st.markdown(
+                f"""
+                <div class="panel" style="margin-top:8px;">
+                  <div style="font-weight:700; color:var(--accent);">{sel}</div>
+                  <div class="small" style="margin-top:4px;">{d}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
         else:
             st.caption("No class list available from model/config.")
         st.markdown("</div>", unsafe_allow_html=True)
@@ -445,6 +412,5 @@ with tab_insights:
                 st.altair_chart(bar_chart(counts, "class:N", "count:Q", title="History — Class Counts"), use_container_width=True)
     else:
         st.caption("No predictions yet. Use Manual Prediction or CSV Upload.")
-
 
 
