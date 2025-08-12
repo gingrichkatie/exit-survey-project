@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Exit Survey Classifier — Business Theme 🧭
-# Polished, professional UI with subtle emojis, banner, and optional logo.
+# Exit Survey Classifier — Pro Theme
+# Clean, business-forward UI: bold outlines, flat tabs, neutral colors.
 
 import os, io, traceback
 import streamlit as st
@@ -18,9 +18,9 @@ ct._RemainderColsList = _RemainderColsList
 BASE_DIR = os.path.dirname(__file__)
 REQ = ["best_model.pkl", "preprocess.pkl", "text_vectorizer.pkl", "column_config.pkl"]
 
-# ─────────────────────────────────────────────────────────────
-# Page Config
-# ─────────────────────────────────────────────────────────────
+# ───────────────────────────
+# Page config
+# ───────────────────────────
 st.set_page_config(
     page_title="Exit Survey Classifier",
     page_icon="💼",
@@ -28,114 +28,97 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ─────────────────────────────────────────────────────────────
-# Clean Business Theme (light)
-# ─────────────────────────────────────────────────────────────
+# ───────────────────────────
+# Professional theme (navy / slate / blue)
+# Tabs are FLAT with underline for the active one; strong card borders.
+# ───────────────────────────
 st.markdown("""
 <style>
-:root {
-  --accent: #1F6FEB;       /* primary blue */
-  --accent-2: #0EA5E9;     /* cyan accent */
-  --ink: #111827;          /* text */
-  --muted: #6B7280;        /* secondary text */
-  --line: #E5E7EB;         /* borders */
-  --card: #FFFFFF;         /* cards */
-  --bg: #F8FAFC;           /* page bg */
+:root{
+  --brand:#0B3A75;   /* navy */
+  --brand-2:#1F6FEB; /* blue */
+  --ink:#111827;     /* text */
+  --muted:#6B7280;   /* secondary text */
+  --line:#D1D5DB;    /* border */
+  --bg:#F8FAFC;      /* page bg */
+  --card:#FFFFFF;    /* card bg */
 }
 
-html, body, [class^="css"]  { background: var(--bg) !important; color: var(--ink); }
-
-section.main > div { padding-top: 1.25rem; padding-bottom: 2rem; }
+html, body, [class^="css"]{ background:var(--bg) !important; color:var(--ink); }
+section.main > div{ padding-top:1rem; padding-bottom:2rem; }
 
 /* Banner */
-.banner {
-  background: linear-gradient(90deg, rgba(31,111,235,0.08), rgba(14,165,233,0.08));
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 18px 20px;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 16px;
-  align-items: center;
+.pro-banner{
+  display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center;
+  background:linear-gradient(90deg, rgba(11,58,117,0.05), rgba(31,111,235,0.05));
+  border:2px solid var(--brand); border-radius:10px; padding:16px 18px;
 }
-.banner .title { font-size: 1.6rem; font-weight: 700; letter-spacing: .2px; }
-.banner .subtitle { color: var(--muted); margin-top: 4px; }
+.pro-banner .title{ font-size:1.5rem; font-weight:700; letter-spacing:.2px; }
+.pro-banner .subtitle{ color:var(--muted); margin-top:4px; }
 
 /* KPI cards */
-.kpi {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px 14px;
-  display: grid; gap: 4px;
+.kpi{
+  background:var(--card); border:2px solid var(--line); border-radius:10px;
+  padding:12px 14px; display:grid; gap:4px;
 }
-.kpi .label { color: var(--muted); font-size: 0.82rem; }
-.kpi .value { font-weight: 700; font-size: 1.1rem; }
+.kpi .label{ color:var(--muted); font-size:.85rem; }
+.kpi .value{ font-weight:700; font-size:1.05rem; }
 
-/* Panels */
-.panel {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 14px 16px;
+/* Panels (content cards) */
+.panel{
+  background:var(--card); border:2px solid var(--line); border-radius:10px; padding:14px 16px;
 }
 
-/* Tabs */
-.stTabs [data-baseweb="tab-list"] { gap: 8px; flex-wrap: wrap; }
-.stTabs [role="tab"] {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-bottom: 2px solid transparent;
-  border-radius: 12px 12px 0 0;
-  color: var(--ink);
+/* FLAT TABS: no boxes; underline on active */
+.stTabs [data-baseweb="tab-list"]{ gap:18px; border-bottom:2px solid var(--line); }
+.stTabs [role="tab"]{
+  background:transparent; border:none; padding:8px 2px; margin-bottom:-2px;
+  color:var(--muted); font-weight:600;
 }
-.stTabs [aria-selected="true"] {
-  border-color: var(--accent);
+.stTabs [aria-selected="true"]{
+  color:var(--brand); border-bottom:3px solid var(--brand);
 }
 
-/* Badges & helpers */
-.badge {
-  display:inline-block; padding: 2px 10px;
-  border-radius: 999px; border: 1px solid var(--line);
-  background: #F3F4F6; color: var(--ink);
-  font-weight: 600; font-size: 0.78rem; letter-spacing: 0.2px;
+/* Badges / small helpers */
+.badge{
+  display:inline-block; padding:2px 8px; border-radius:999px;
+  background:#EEF2FF; color:#1E40AF; border:1px solid #C7D2FE; font-size:.78rem; font-weight:700;
 }
-.small { color: var(--muted); font-size: 0.9rem; }
-hr.divider { border: none; height: 1px; background: var(--line); margin: 10px 0 18px; }
+.small{ color:var(--muted); font-size:.9rem; }
+hr.div{ border:none; height:2px; background:var(--line); margin:12px 0 18px; }
 </style>
 """, unsafe_allow_html=True)
 
-# Optional logo if present next to script (logo.png or logo.jpg)
+# ───────────────────────────
+# Optional logo (logo.png/.jpg/.jpeg alongside the script)
+# ───────────────────────────
 logo_path = None
-for candidate in ("logo.png", "logo.jpg", "logo.jpeg"):
+for candidate in ("logo.png","logo.jpg","logo.jpeg"):
     p = os.path.join(BASE_DIR, candidate)
     if os.path.exists(p):
-        logo_path = p
-        break
+        logo_path = p; break
 
 # Banner
-col_logo, col_text = st.columns([1,5])
-with col_logo:
+c_logo, c_text = st.columns([1,5])
+with c_logo:
     if logo_path:
-        st.image(logo_path, width=72)
-    else:
-        st.markdown("### 💼")
-with col_text:
-    st.markdown("""
-<div class="banner">
-  <div>📊</div>
+        st.image(logo_path, width=64)
+with c_text:
+    st.markdown(f"""
+<div class="pro-banner">
+  <div style="width:14px;height:14px;border-radius:2px;background:var(--brand);"></div>
   <div>
     <div class="title">Exit Survey Classifier</div>
-    <div class="subtitle">Predict the primary reason for leaving from survey inputs — manually or in bulk via CSV.</div>
+    <div class="subtitle">Predict the primary reason for leaving from survey inputs — manual entry or CSV batch.</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<hr class="divider" />', unsafe_allow_html=True)
+st.markdown('<hr class="div" />', unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────────────────────
+# ───────────────────────────
 # Helpers
-# ─────────────────────────────────────────────────────────────
+# ───────────────────────────
 def _csv_template_bytes(cols) -> bytes:
     tpl = pd.DataFrame([{c: "" for c in cols}])
     buf = io.StringIO(); tpl.to_csv(buf, index=False)
@@ -172,25 +155,25 @@ def predict_df(df_in, model, preprocess, text_vectorizer, text_col):
     preds = model.predict(X)
     return preds, None, None, None
 
-def bar_chart_business(df, x, y, title=""):
+def bar_chart_pro(df, x, y, title=""):
     base = alt.Chart(df).encode(
-        x=alt.X(x, sort='-y', axis=alt.Axis(labelColor='#111827', titleColor='#111827', labelLimit=200)),
+        x=alt.X(x, sort='-y', axis=alt.Axis(labelColor='#111827', titleColor='#111827', labelLimit=220)),
         y=alt.Y(y, axis=alt.Axis(labelColor='#111827', titleColor='#111827')),
         tooltip=[x, y]
     )
-    bars = base.mark_bar(cornerRadius=4, stroke='#ffffff', strokeWidth=0.2, opacity=0.95).encode(
+    bars = base.mark_bar(cornerRadius=2, stroke='#111827', strokeWidth=1, opacity=0.95).encode(
         color=alt.value("#1F6FEB")
     )
-    return bars.properties(height=280, title=title).configure_title(color='#111827')
+    return bars.properties(height=260, title=title).configure_title(color='#111827')
 
-# ─────────────────────────────────────────────────────────────
-# Load Model Artifacts
-# ─────────────────────────────────────────────────────────────
+# ───────────────────────────
+# Load artifacts
+# ───────────────────────────
 try:
     model, preprocess, text_vectorizer, cfg = load_artifacts()
 except Exception as e:
-    st.error("⚠️ The app failed to start because model files could not be loaded.")
-    with st.expander("Show error details"):
+    st.error("The app failed to start because model files could not be loaded.")
+    with st.expander("Error details"):
         st.exception(e)
         st.code(traceback.format_exc())
     st.stop()
@@ -205,29 +188,29 @@ INT_COLS = cfg.get("INTEGER_COLS", [])
 if "Age" in NUMERIC_COLS and "Age" not in INT_COLS:
     INT_COLS = list(set(INT_COLS + ["Age"]))
 
-# ─────────────────────────────────────────────────────────────
-# Status Row (minimal + business)
-# ─────────────────────────────────────────────────────────────
-c1, c2, c3, c4 = st.columns([1,1,1,1.2])
-with c1:
-    st.markdown('<div class="kpi"><div class="label">📦 Artifacts</div><div class="value">Loaded</div></div>', unsafe_allow_html=True)
-with c2:
-    st.markdown(f'<div class="kpi"><div class="label">🧮 Features</div><div class="value">{len(EXPECTED_COLS)} cols</div></div>', unsafe_allow_html=True)
-with c3:
-    n_classes = len(CLASS_ORDER) if CLASS_ORDER else "—"
-    st.markdown(f'<div class="kpi"><div class="label">🏷️ Classes</div><div class="value">{n_classes}</div></div>', unsafe_allow_html=True)
-with c4:
-    txt = "Enabled" if TEXT_COL else "—"
-    st.markdown(f'<div class="kpi"><div class="label">💬 Text Feature</div><div class="value">{txt}</div></div>', unsafe_allow_html=True)
+# ───────────────────────────
+# Compact status row
+# ───────────────────────────
+k1, k2, k3, k4 = st.columns([1,1,1,1])
+with k1:
+    st.markdown('<div class="kpi"><div class="label">Artifacts</div><div class="value">Loaded</div></div>', unsafe_allow_html=True)
+with k2:
+    st.markdown(f'<div class="kpi"><div class="label">Features</div><div class="value">{len(EXPECTED_COLS)}</div></div>', unsafe_allow_html=True)
+with k3:
+    n_classes = len(CLASS_ORDER) if CLASS_ORDER else "–"
+    st.markdown(f'<div class="kpi"><div class="label">Classes</div><div class="value">{n_classes}</div></div>', unsafe_allow_html=True)
+with k4:
+    txt = "Enabled" if TEXT_COL else "–"
+    st.markdown(f'<div class="kpi"><div class="label">Text Feature</div><div class="value">{txt}</div></div>', unsafe_allow_html=True)
 
-st.markdown('<hr class="divider" />', unsafe_allow_html=True)
+st.markdown('<hr class="div" />', unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────────────────────
-# Tabs
-# ─────────────────────────────────────────────────────────────
-tab_manual, tab_csv, tab_insights = st.tabs(["✨ Manual Prediction", "📁 CSV Upload", "🔎 Insights"])
+# ───────────────────────────
+# Tabs (flat)
+# ───────────────────────────
+tab_manual, tab_csv, tab_insights = st.tabs(["Manual Prediction", "CSV Upload", "Insights"])
 
-# Session History
+# Session history
 if "history" not in st.session_state:
     st.session_state.history = pd.DataFrame(columns=EXPECTED_COLS + ["prediction", "confidence"])
 
@@ -235,39 +218,40 @@ if "history" not in st.session_state:
 # Manual Prediction
 # =========================================================
 with tab_manual:
-    st.subheader("✨ Manual Prediction")
-    st.markdown("<div class='panel small'>Complete the form and get a prediction. Select all dropdowns to enable the button.</div>", unsafe_allow_html=True)
+    st.subheader("Manual Prediction")
+    st.markdown("<div class='panel small'>Complete the form and generate a prediction. All required dropdowns must be selected to enable the button.</div>", unsafe_allow_html=True)
 
     vals = {}
-    col1, col2 = st.columns(2)
+    cA, cB = st.columns(2)
 
-    with col1:
+    with cA:
         st.markdown("**Numeric Inputs**")
         for col in NUMERIC_COLS:
             if col in INT_COLS:
-                vals[col] = st.number_input(f"{col}", value=0, step=1, format="%d")
+                vals[col] = st.number_input(col, value=0, step=1, format="%d")
             else:
-                vals[col] = st.number_input(f"{col}", value=0.00, step=0.01, format="%.2f")
+                vals[col] = st.number_input(col, value=0.00, step=0.01, format="%.2f")
 
-    with col2:
+    with cB:
         st.markdown("**Categorical Inputs**")
         for col in CATEGORICAL_COLS:
             choices = [str(x) for x in CAT_CHOICES.get(col, [])]
             if "Other" in choices:
                 choices = [c for c in choices if c != "Other"] + ["Other"]
             if choices:
-                vals[col] = st.selectbox(f"{col}", options=choices, index=None, placeholder=f"Select {col}")
+                vals[col] = st.selectbox(col, options=choices, index=None, placeholder=f"Select {col}")
             else:
-                vals[col] = st.text_input(f"{col}", value="")
+                vals[col] = st.text_input(col, value="")
 
     if TEXT_COL:
         st.markdown("**Optional Text**")
         vals[TEXT_COL] = st.text_area(TEXT_COL, value="", height=110, placeholder="Short note (optional)")
 
     ready = all(v not in (None, "") for k, v in vals.items() if k in CATEGORICAL_COLS)
-    cA, cB = st.columns([1,4])
-    with cA:
-        predict_clicked = st.button("🔮 Predict", use_container_width=True, type="primary", disabled=not ready)
+    c_btn, _ = st.columns([1,4])
+    with c_btn:
+        predict_clicked = st.button("Predict", use_container_width=True, disabled=not ready)
+
     if not ready:
         st.caption("Select all dropdown values to enable prediction.")
 
@@ -286,7 +270,7 @@ with tab_manual:
 
         preds, conf, proba, classes_ = predict_df(row, model, preprocess, text_vectorizer, TEXT_COL)
 
-        # Result + Probability
+        # Result card
         st.markdown('<br/>', unsafe_allow_html=True)
         rc1, rc2 = st.columns([1.2, 2])
         with rc1:
@@ -295,7 +279,7 @@ with tab_manual:
                     f"""
                     <div class="panel">
                       <div class="badge">Prediction</div>
-                      <h3 style="margin:6px 0 4px 0;">🎯 {preds[0]}</h3>
+                      <h3 style="margin:6px 0 4px 0;">{preds[0]}</h3>
                       <div class="small">Confidence: <strong>{conf[0]:.0%}</strong></div>
                     </div>
                     """, unsafe_allow_html=True
@@ -305,7 +289,7 @@ with tab_manual:
                     f"""
                     <div class="panel">
                       <div class="badge">Prediction</div>
-                      <h3 style="margin:6px 0 4px 0;">🎯 {preds[0]}</h3>
+                      <h3 style="margin:6px 0 4px 0;">{preds[0]}</h3>
                       <div class="small">Model does not expose probabilities</div>
                     </div>
                     """, unsafe_allow_html=True
@@ -314,7 +298,7 @@ with tab_manual:
             if proba is not None:
                 p = pd.DataFrame({"class": classes_, "prob": proba.flatten()}).sort_values("prob", ascending=False)
                 st.altair_chart(
-                    bar_chart_business(p, "class:N", "prob:Q", title="Class Probabilities"),
+                    bar_chart_pro(p, "class:N", "prob:Q", title="Class Probabilities"),
                     use_container_width=True
                 )
 
@@ -328,11 +312,11 @@ with tab_manual:
 # CSV Upload
 # =========================================================
 with tab_csv:
-    st.subheader("📁 CSV Upload")
-    st.markdown("<div class='panel small'>Upload multiple rows. Start from the template to match expected columns.</div>", unsafe_allow_html=True)
+    st.subheader("CSV Upload")
+    st.markdown("<div class='panel small'>Batch predictions. Use the template to match the expected schema.</div>", unsafe_allow_html=True)
 
     st.download_button(
-        "⬇️ Download CSV Template",
+        "Download CSV Template",
         data=_csv_template_bytes(EXPECTED_COLS),
         file_name="exit_survey_template.csv",
         mime="text/csv",
@@ -346,14 +330,14 @@ with tab_csv:
         try:
             data = pd.read_csv(f)
         except Exception as e:
-            st.error("❌ Could not read your CSV.")
+            st.error("Could not read your CSV.")
             with st.expander("Details"):
                 st.exception(e)
             st.stop()
 
         missing = [c for c in EXPECTED_COLS if c not in data.columns]
         if missing:
-            st.error("🚫 Missing columns: " + ", ".join(missing))
+            st.error("Missing columns: " + ", ".join(missing))
             st.stop()
 
         data = data[EXPECTED_COLS]
@@ -375,47 +359,47 @@ with tab_csv:
         st.markdown("**Results**")
         st.dataframe(out, use_container_width=True)
 
-        # Distribution
+        # Predicted class distribution
         dist = pd.Series(preds).value_counts().reset_index()
         dist.columns = ["class", "count"]
         st.markdown("**Predicted Class Distribution**")
-        st.altair_chart(bar_chart_business(dist, "class:N", "count:Q"), use_container_width=True)
+        st.altair_chart(bar_chart_pro(dist, "class:N", "count:Q"), use_container_width=True)
 
-        # Confidence histogram
+        # Confidence histogram (if available)
         if conf is not None:
             bins = np.linspace(0, 1, 11)
             hist, edges = np.histogram(conf, bins=bins)
             conf_df = pd.DataFrame({
-                "bucket": [f"{edges[i]:.1f}-{edges[i+1]:.1f}" for i in range(len(hist))],
-                "count": hist
+                "bucket":[f"{edges[i]:.1f}-{edges[i+1]:.1f}" for i in range(len(hist))],
+                "count":hist
             })
             st.markdown("**Confidence Histogram**")
-            st.altair_chart(bar_chart_business(conf_df, "bucket:N", "count:Q"), use_container_width=True)
+            st.altair_chart(bar_chart_pro(conf_df, "bucket:N", "count:Q"), use_container_width=True)
 
 # =========================================================
-# Insights / Recent predictions
+# Insights
 # =========================================================
 with tab_insights:
-    st.subheader("🔎 Insights")
+    st.subheader("Insights")
     if not st.session_state.history.empty:
-        st.markdown("<span class='badge'>Newest is last</span>", unsafe_allow_html=True)
+        st.markdown("<span class='badge'>Newest entries appear last</span>", unsafe_allow_html=True)
         st.dataframe(st.session_state.history.tail(15), use_container_width=True)
 
-        c1, c2 = st.columns([1,3])
-        with c1:
-            if st.button("🧹 Clear history", use_container_width=True):
+        s1, s2 = st.columns([1,3])
+        with s1:
+            if st.button("Clear history", use_container_width=True):
                 st.session_state.history = pd.DataFrame(columns=EXPECTED_COLS + ["prediction", "confidence"])
-                st.toast("History cleared.", icon="✅")
-        with c2:
-            pred_counts = st.session_state.history["prediction"].value_counts().reset_index()
-            pred_counts.columns = ["class", "count"]
-            if not pred_counts.empty:
+                st.success("History cleared.")
+        with s2:
+            counts = st.session_state.history["prediction"].value_counts().reset_index()
+            counts.columns = ["class","count"]
+            if not counts.empty:
                 st.altair_chart(
-                    bar_chart_business(pred_counts, "class:N", "count:Q", title="History — Class Counts"),
+                    bar_chart_pro(counts, "class:N", "count:Q", title="History — Class Counts"),
                     use_container_width=True
                 )
     else:
-        st.caption("No predictions yet. Try **Manual Prediction** or **CSV Upload** above.")
+        st.caption("No predictions yet. Use Manual Prediction or CSV Upload.")
 
 
 
