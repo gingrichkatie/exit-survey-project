@@ -1,5 +1,3 @@
-# Exit Survey Classifier — Pro Theme (full-width banner, neutral buttons, red charts, exit options, about section)
-
 import os, io, traceback
 import streamlit as st
 import pandas as pd
@@ -40,8 +38,8 @@ section.main > div{ padding-top:0.75rem; padding-bottom:2rem; }
 .full-bleed-banner{
   width:100vw; position:relative; left:50%; right:50%;
   margin-left:-50vw; margin-right:-50vw;
-  margin-bottom: 1.5rem;
   background:var(--accent); border:none;
+  margin-bottom: 1.5rem;  /* breathing room before tabs */
 }
 .full-bleed-inner{
   max-width:1200px; margin:0 auto; padding:16px 24px;
@@ -69,19 +67,18 @@ section.main > div{ padding-top:0.75rem; padding-bottom:2rem; }
 .kpi .label{ color:var(--muted); font-size:.85rem; }
 .kpi .value{ font-weight:700; font-size:1.05rem; }
 
-/* Chips (class list) */
-.chips{ display:flex; flex-wrap:wrap; gap:8px; }
+/* Exit options chips — clean, no hollow circle */
+.chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
 .chip{
-  background: var(--btn);       /* light gray background */
-  color: var(--ink);            /* dark text */
-  border: none;                 /* remove outline */
-  border-radius: 6px;           /* subtle rounded corners */
+  background: var(--btn);
+  color: var(--ink);
+  border: none;
+  border-radius: 6px;
   padding: 6px 12px;
   font-weight: 600;
   font-size: .88rem;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
-.chip.note{ color:var(--muted); font-weight:500; border-style:dashed; }
 
 /* Neutral gray buttons (download & primary) */
 div[data-testid="stDownloadButton"] button,
@@ -339,26 +336,24 @@ with tab_manual:
             hist_row["confidence"] = None if conf is None else float(conf[0])
             st.session_state.history = pd.concat([st.session_state.history, hist_row], ignore_index=True)
 
-    # Right: Exit Options (chips + dropdown with definition)
+    # Right: Exit Options (chips + dropdown with description)
     with right:
-        st.markdown("**Exit Options**")
+        # Clean section header (no icon/circle)
+        st.markdown("<h4 style='margin:0 0 6px 0;'>Exit Options</h4>", unsafe_allow_html=True)
         st.markdown("<div class='panel tight'>", unsafe_allow_html=True)
 
         if CLASS_LIST:
-            # Chips view
+            # Chips view (flat, borderless—no empty circles)
             st.markdown('<div class="chips">', unsafe_allow_html=True)
             for c in CLASS_LIST:
                 st.markdown(f'<div class="chip">{c}</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
-            # Dropdown to browse definitions
-            st.markdown("<hr class='div' />", unsafe_allow_html=True)
+            # Focused browser for descriptions (no extra circle or hr above)
             sel = st.selectbox("Browse option details", options=CLASS_LIST, index=0 if CLASS_LIST else None)
-            desc = ""
-            if isinstance(CLASS_LABEL_DESCRIPTIONS, dict):
-                desc = CLASS_LABEL_DESCRIPTIONS.get(sel, "")
+            desc = CLASS_LABEL_DESCRIPTIONS.get(sel, "") if isinstance(CLASS_LABEL_DESCRIPTIONS, dict) else ""
             if desc:
-                st.write(desc)
+                st.markdown(f"<div class='small' style='margin-top:6px;'>{desc}</div>", unsafe_allow_html=True)
             else:
                 st.caption("No description available for this option.")
         else:
@@ -450,5 +445,6 @@ with tab_insights:
                 st.altair_chart(bar_chart(counts, "class:N", "count:Q", title="History — Class Counts"), use_container_width=True)
     else:
         st.caption("No predictions yet. Use Manual Prediction or CSV Upload.")
+
 
 
