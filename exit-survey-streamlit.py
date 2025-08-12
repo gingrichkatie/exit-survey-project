@@ -27,7 +27,6 @@ REQ = ["best_model.pkl", "preprocess.pkl", "text_vectorizer.pkl", "column_config
 # ───────────────────────────
 st.set_page_config(
     page_title="Exit Survey Classifier",
-    page_icon="💼",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
